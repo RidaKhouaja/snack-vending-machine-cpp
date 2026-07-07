@@ -164,6 +164,4 @@ Monnaie rendue (5 DH) :
 - Gestion manuelle de la mémoire (`new` / `delete`)
 - `enum class` pour modéliser une machine à états
 
-## Auteur
 
-Rida — étudiant en Génie Informatique (GI1)
