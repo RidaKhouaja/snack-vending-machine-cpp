@@ -1,0 +1,9 @@
+# Exécutable compilé
+distributeur
+
+# Fichiers objets
+*.o
+*.out
+
+# Fichiers système
+.DS_Store
