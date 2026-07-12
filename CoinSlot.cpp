@@ -39,6 +39,16 @@ int CoinSlot::updateCoinAmount() {
     return piece;
 }
 
+bool CoinSlot::ajouterPiece(int valeur) {
+    for (int i = 0; i < NUM_COIN_VALUES; ++i) {
+        if (coinValues[i] == valeur) {
+            coinAmount += valeur;
+            return true;
+        }
+    }
+    return false;
+}
+
 int CoinSlot::getCoinAmount() const {
     return coinAmount;
 }
@@ -48,20 +58,27 @@ void CoinSlot::clear() {
 }
 
 void CoinSlot::returnCoins(int prix) {
+    std::cout << returnCoinsText(prix);
+}
+
+std::string CoinSlot::returnCoinsText(int prix) {
     int monnaie = coinAmount - prix;
+    std::string texte;
+
     if (monnaie <= 0) {
-        std::cout << "Aucune monnaie a rendre.\n";
+        texte = "Aucune monnaie a rendre.\n";
         clear();
-        return;
+        return texte;
     }
 
-    std::cout << "Monnaie rendue (" << monnaie << " DH) :\n";
+    texte = "Monnaie rendue (" + std::to_string(monnaie) + " DH) :\n";
     for (int i = 0; i < NUM_COIN_VALUES; ++i) {
         int nb = monnaie / coinValues[i];
         if (nb > 0) {
-            std::cout << "  " << nb << " x " << coinValues[i] << " DH\n";
+            texte += "  " + std::to_string(nb) + " x " + std::to_string(coinValues[i]) + " DH\n";
             monnaie -= nb * coinValues[i];
         }
     }
     clear();
+    return texte;
 }

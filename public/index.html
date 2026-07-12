@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Distributeur automatique de snacks</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #1e1e2f;
+        color: #eee;
+        margin: 0;
+        padding: 20px;
+    }
+    h1 { text-align: center; color: #ffcc66; }
+    .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+    .tabs button {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px 8px 0 0;
+        background: #2f2f45;
+        color: #ccc;
+        cursor: pointer;
+        font-size: 15px;
+    }
+    .tabs button.active { background: #3d3d5c; color: #ffcc66; font-weight: bold; }
+    .panel { display: none; max-width: 900px; margin: 0 auto; background: #2a2a3d; padding: 20px; border-radius: 0 8px 8px 8px; }
+    .panel.active { display: block; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+    th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #444; }
+    th { color: #ffcc66; }
+    button.action {
+        padding: 6px 14px;
+        border: none;
+        border-radius: 6px;
+        background: #4caf50;
+        color: white;
+        cursor: pointer;
+    }
+    button.action:disabled { background: #555; cursor: not-allowed; }
+
+    .achat-box { background: #33334a; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+    .pieces button {
+        margin: 4px;
+        padding: 10px 16px;
+        border-radius: 50%;
+        border: 2px solid #ffcc66;
+        background: #444;
+        color: #ffcc66;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .pieces button:disabled { opacity: 0.3; cursor: not-allowed; }
+    #boutonAnnuler {
+        margin-top: 10px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #d9534f;
+        color: white;
+        cursor: pointer;
+    }
+    #boutonAnnuler:disabled { background: #555; cursor: not-allowed; }
+
+    #journal {
+        background: #111;
+        color: #7fffa0;
+        font-family: monospace;
+        padding: 10px;
+        border-radius: 6px;
+        height: 160px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }
+
+    fieldset { border: 1px solid #555; border-radius: 8px; margin-bottom: 15px; }
+    legend { color: #ffcc66; padding: 0 6px; }
+    label { display: block; margin: 8px 0 3px; font-size: 13px; color: #ccc; }
+    input, select {
+        width: 100%; padding: 6px; border-radius: 5px; border: 1px solid #555;
+        background: #1e1e2f; color: #eee;
+    }
+    .form-buttons button {
+        margin-top: 10px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #337ab7;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<h1>🍫 Distributeur automatique de snacks</h1>
+
+<div class="tabs">
+    <button id="ongletClientBtn" class="active" onclick="afficherOnglet('client')">Client</button>
+    <button id="ongletAdminBtn" onclick="afficherOnglet('admin')">Administration</button>
+</div>
+
+<!-- ============== ONGLET CLIENT ============== -->
+<div id="panelClient" class="panel active">
+    <table>
+        <thead>
+            <tr><th>N</th><th>Produit</th><th>Prix (DH)</th><th>Stock</th><th></th></tr>
+        </thead>
+        <tbody id="tableProduitsClient"></tbody>
+    </table>
+
+    <div class="achat-box">
+        <p id="infoPrix">Prix : -</p>
+        <p id="infoMontant">Montant insere : 0 DH</p>
+        <div class="pieces">
+            <button class="boutonPiece" onclick="insererPiece(10)" disabled>10 DH</button>
+            <button class="boutonPiece" onclick="insererPiece(5)" disabled>5 DH</button>
+            <button class="boutonPiece" onclick="insererPiece(2)" disabled>2 DH</button>
+            <button class="boutonPiece" onclick="insererPiece(1)" disabled>1 DH</button>
+        </div>
+        <button id="boutonAnnuler" onclick="annulerAchat()" disabled>Annuler l'achat</button>
+    </div>
+
+    <div>
+        <p style="color:#ffcc66; margin-bottom:4px;">Journal :</p>
+        <div id="journal"></div>
+    </div>
+</div>
+
+<!-- ============== ONGLET ADMIN ============== -->
+<div id="panelAdmin" class="panel">
+    <table>
+        <thead>
+            <tr><th>N</th><th>Produit</th><th>Prix (DH)</th><th>Stock</th></tr>
+        </thead>
+        <tbody id="tableProduitsAdmin"></tbody>
+    </table>
+
+    <fieldset>
+        <legend>Ajouter un emplacement</legend>
+        <label>Type</label>
+        <select id="ajoutType">
+            <option value="etroit">Etroit (1 moteur)</option>
+            <option value="large">Large (2 moteurs)</option>
+        </select>
+        <label>Nom du produit</label>
+        <input id="ajoutNom" type="text">
+        <label>Prix (DH)</label>
+        <input id="ajoutPrix" type="number">
+        <label>Numero d'emplacement</label>
+        <input id="ajoutId" type="number">
+        <label>Id moteur 1</label>
+        <input id="ajoutMoteur1" type="number">
+        <label>Id moteur 2 (si large)</label>
+        <input id="ajoutMoteur2" type="number">
+        <div class="form-buttons"><button onclick="ajouterEmplacement()">Ajouter</button></div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Modifier un emplacement</legend>
+        <label>Numero d'emplacement</label>
+        <input id="modifId" type="number">
+        <label>Nouveau nom</label>
+        <input id="modifNom" type="text">
+        <label>Nouveau prix (DH)</label>
+        <input id="modifPrix" type="number">
+        <div class="form-buttons"><button onclick="modifierEmplacement()">Modifier</button></div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Remplir un emplacement</legend>
+        <label>Numero d'emplacement</label>
+        <input id="remplirId" type="number">
+        <label>Quantite a ajouter</label>
+        <input id="remplirQte" type="number">
+        <div class="form-buttons">
+            <button onclick="remplirEmplacement()">Remplir</button>
+            <button onclick="remplirTout()">Remplir tous les emplacements</button>
+        </div>
+    </fieldset>
+</div>
+
+<script>
+let etatCourant = "IDLE";
+
+async function appelApi(url, corps) {
+    const options = corps
+        ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corps) }
+        : { method: "GET" };
+    const reponse = await fetch(url, options);
+    return await reponse.json();
+}
+
+function afficherOnglet(nom) {
+    document.getElementById("panelClient").classList.toggle("active", nom === "client");
+    document.getElementById("panelAdmin").classList.toggle("active", nom === "admin");
+    document.getElementById("ongletClientBtn").classList.toggle("active", nom === "client");
+    document.getElementById("ongletAdminBtn").classList.toggle("active", nom === "admin");
+    rafraichirEtat();
+}
+
+function ajouterAuJournal(message) {
+    if (!message) return;
+    const journal = document.getElementById("journal");
+    journal.textContent += message + "\n";
+    journal.scrollTop = journal.scrollHeight;
+}
+
+function majInterface(data) {
+    etatCourant = data.etat;
+
+    // --- Tableau client ---
+    const corpsClient = document.getElementById("tableProduitsClient");
+    corpsClient.innerHTML = "";
+    data.produits.forEach(p => {
+        const ligne = document.createElement("tr");
+        const disponible = p.stock > 0 && etatCourant === "IDLE";
+        ligne.innerHTML = `<td>${p.id}</td><td>${p.nom}</td><td>${p.prix}</td><td>${p.stock}</td>
+            <td><button class="action" ${disponible ? "" : "disabled"} onclick="selectionnerProduit(${p.id})">Choisir</button></td>`;
+        corpsClient.appendChild(ligne);
+    });
+
+    // --- Tableau admin ---
+    const corpsAdmin = document.getElementById("tableProduitsAdmin");
+    corpsAdmin.innerHTML = "";
+    data.produits.forEach(p => {
+        const ligne = document.createElement("tr");
+        ligne.innerHTML = `<td>${p.id}</td><td>${p.nom}</td><td>${p.prix}</td><td>${p.stock}</td>`;
+        corpsAdmin.appendChild(ligne);
+    });
+
+    // --- Panneau achat ---
+    document.getElementById("infoPrix").textContent = etatCourant === "COLLECTING"
+        ? `Prix : ${data.prixCourant} DH`
+        : "Prix : -";
+    document.getElementById("infoMontant").textContent = `Montant insere : ${data.montantInsere} DH`;
+
+    const enCollecte = etatCourant === "COLLECTING";
+    document.querySelectorAll(".boutonPiece").forEach(b => b.disabled = !enCollecte);
+    document.getElementById("boutonAnnuler").disabled = !enCollecte;
+}
+
+async function rafraichirEtat() {
+    const data = await appelApi("/api/etat");
+    majInterface(data);
+}
+
+async function selectionnerProduit(id) {
+    const data = await appelApi("/api/selectionner", { id });
+    majInterface(data);
+    ajouterAuJournal(data.message);
+}
+
+async function insererPiece(valeur) {
+    const data = await appelApi("/api/inserer", { valeur });
+    majInterface(data);
+    ajouterAuJournal(data.message);
+}
+
+async function annulerAchat() {
+    const data = await appelApi("/api/annuler");
+    majInterface(data);
+    ajouterAuJournal(data.message);
+}
+
+async function ajouterEmplacement() {
+    const corps = {
+        type: document.getElementById("ajoutType").value,
+        nom: document.getElementById("ajoutNom").value,
+        prix: parseInt(document.getElementById("ajoutPrix").value) || 0,
+        id: parseInt(document.getElementById("ajoutId").value) || 0,
+        moteur1: parseInt(document.getElementById("ajoutMoteur1").value) || 0,
+        moteur2: parseInt(document.getElementById("ajoutMoteur2").value) || 0
+    };
+    const data = await appelApi("/api/admin/ajouter", corps);
+    majInterface(data);
+    alert(data.message);
+}
+
+async function modifierEmplacement() {
+    const corps = {
+        id: parseInt(document.getElementById("modifId").value) || 0,
+        nom: document.getElementById("modifNom").value,
+        prix: parseInt(document.getElementById("modifPrix").value) || 0
+    };
+    const data = await appelApi("/api/admin/modifier", corps);
+    majInterface(data);
+}
+
+async function remplirEmplacement() {
+    const corps = {
+        id: parseInt(document.getElementById("remplirId").value) || 0,
+        quantite: parseInt(document.getElementById("remplirQte").value) || 0
+    };
+    const data = await appelApi("/api/admin/remplir", corps);
+    majInterface(data);
+}
+
+async function remplirTout() {
+    const data = await appelApi("/api/admin/remplirTout");
+    majInterface(data);
+}
+
+rafraichirEtat();
+</script>
+
+</body>
+</html>

@@ -1,6 +1,10 @@
-# 🍫 Snack Vending Machine Simulator (C++ / OOP)
+# 🍫 Distributeur automatique de snacks (C++ / OOP)
 
-Simulation console d'un distributeur automatique de snacks, développée en C++ dans le cadre d'un mini-projet de Programmation Orientée Objet. Le matériel (moteurs, monnayeur, clavier, capteurs infrarouges) est entièrement simulé — aucun composant physique n'est requis.
+Simulation d'un distributeur automatique de snacks développée en C++ dans le cadre d'un mini-projet de Programmation Orientée Objet. Le matériel (moteurs, monnayeur, clavier, capteurs infrarouges) est entièrement simulé — aucun composant physique n'est requis.
+
+Le projet propose **deux façons d'interagir** avec le distributeur :
+- une **version console** (le cœur du TP)
+- une **interface web** (bonus, backend C++ + frontend HTML/CSS/JS)
 
 ## Fonctionnalités
 
@@ -11,12 +15,22 @@ Simulation console d'un distributeur automatique de snacks, développée en C++ 
 - **Mode administrateur** : ajout, modification et réapprovisionnement des emplacements.
 - Deux types d'emplacements avec **héritage/polymorphisme** : `SmallSlot` (1 moteur) et `WideSlot` (2 moteurs).
 
+## Aperçu de l'interface web
+
+| Onglet Client | Onglet Administration |
+|---|---|
+| ![Interface client](screenshots/client.png) | ![Interface administration](screenshots/admin.png) |
+
+L'onglet **Client** permet de choisir un produit, d'insérer des pièces (10, 5, 2, 1 DH), et affiche un journal en temps réel de chaque événement (sélection, insertion, distribution, rendu de monnaie).
+
+L'onglet **Administration** permet d'ajouter un nouvel emplacement (étroit ou large), de modifier un produit existant, ou de réapprovisionner le stock.
+
 ## Diagramme de classes
 
 ```mermaid
 classDiagram
     class Automat {
-        - slots : Slot**
+        - m_slots : Slot**
         - numSlot : int
         - numProductsPerSlot : int
         - cached : Slot*
@@ -29,10 +43,9 @@ classDiagram
         + searchSlot(slotId) Slot*
         + dropSlot(slotId) bool
         + fillAll() void
-        + selectionnerProduit() int
-        + insererPiece() int
-        + verifierChute() bool
-        + rendreMonnaie(prix) void
+        + getAllSlotsInfo() vector~SlotInfo~
+        + essayerAjouterPiece(valeur) bool
+        + rendreMonnaieText(prix) string
     }
 
     class Slot {
@@ -65,8 +78,8 @@ classDiagram
     class CoinSlot {
         - coinAmount : int
         - coinValues : int[4]
-        + updateCoinAmount() int
-        + returnCoins(prix) void
+        + ajouterPiece(valeur) bool
+        + returnCoinsText(prix) string
     }
 
     class Keypad {
@@ -106,19 +119,26 @@ stateDiagram-v2
 
 ```
 .
-├── main.cpp          # Point d'entrée + machine à états + menus
-├── Automat.h/.cpp     # Gestion du distributeur (emplacements, façade des composants)
-├── Slot.h/.cpp        # Classe abstraite représentant un emplacement
-├── SmallSlot.h/.cpp   # Emplacement à un seul moteur
-├── WideSlot.h/.cpp    # Emplacement à deux moteurs
-├── Motor.h/.cpp       # Simulation d'un moteur de spirale
-├── CoinSlot.h/.cpp    # Monnayeur (insertion de pièces, rendu de monnaie)
-├── Keypad.h/.cpp      # Clavier de sélection du produit
-├── DropCheck.h/.cpp   # Capteur infrarouge simulé
+├── main.cpp             # Version console : machine à états + menus
+├── server.cpp           # Version web : backend HTTP (réutilise Automat)
+├── httplib.h            # Bibliothèque HTTP header-only (cpp-httplib)
+├── public/
+│   └── index.html        # Frontend web (HTML + CSS + JS)
+├── Automat.h/.cpp        # Gestion du distributeur (emplacements, façade des composants)
+├── Slot.h/.cpp           # Classe abstraite représentant un emplacement
+├── SmallSlot.h/.cpp      # Emplacement à un seul moteur
+├── WideSlot.h/.cpp       # Emplacement à deux moteurs
+├── Motor.h/.cpp          # Simulation d'un moteur de spirale
+├── CoinSlot.h/.cpp       # Monnayeur (insertion de pièces, rendu de monnaie)
+├── Keypad.h/.cpp         # Clavier de sélection du produit
+├── DropCheck.h/.cpp      # Capteur infrarouge simulé
+├── screenshots/          # Captures d'écran de l'interface web
 └── Makefile
 ```
 
 ## Compilation et exécution
+
+### Version console
 
 ```bash
 make
@@ -132,7 +152,23 @@ g++ -std=c++17 -Wall -Wextra -o distributeur main.cpp Automat.cpp Slot.cpp Small
 ./distributeur
 ```
 
-## Exemple d'exécution
+### Version web
+
+```bash
+make server
+./serveur_distributeur
+```
+
+Ou directement avec g++ (sous Windows/MinGW, ajouter `-lws2_32` à la fin) :
+
+```bash
+g++ -std=c++17 -pthread -o serveur_distributeur server.cpp Automat.cpp Slot.cpp SmallSlot.cpp WideSlot.cpp Motor.cpp CoinSlot.cpp Keypad.cpp DropCheck.cpp
+./serveur_distributeur
+```
+
+Puis ouvrir **http://localhost:8080** dans un navigateur.
+
+## Exemple d'exécution (console)
 
 ```
 ===== SESSION CLIENT =====
@@ -163,7 +199,5 @@ Monnaie rendue (5 DH) :
 - Surcharge de fonctions (`addSlot()`)
 - Gestion manuelle de la mémoire (`new` / `delete`)
 - `enum class` pour modéliser une machine à états
+- Serveur HTTP en C++ (bibliothèque header-only, réutilisation de la logique métier sans dépendance à une interface particulière)
 
-## Auteur
-
-Rida — étudiant en Génie Informatique (GI1)

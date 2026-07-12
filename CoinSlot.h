@@ -1,6 +1,8 @@
 #ifndef COINSLOT_H
 #define COINSLOT_H
 
+#include <string>
+
 /**
  * CoinSlot simule le monnayeur du distributeur.
  *
@@ -22,6 +24,11 @@ public:
     // Ajoute la piece a coinAmount si elle est valide. Retourne la valeur saisie.
     int updateCoinAmount();
 
+    // Version non-bloquante pour une interface graphique : ajoute directement
+    // une piece (deja choisie via un bouton, par ex.) sans passer par cin.
+    // Retourne false si la valeur n'est pas une denomination valide.
+    bool ajouterPiece(int valeur);
+
     int getCoinAmount() const;
 
     // Reinitialise coinAmount a 0
@@ -29,6 +36,10 @@ public:
 
     // Calcule et affiche la monnaie a rendre par rapport au prix passe en parametre
     void returnCoins(int prix);
+
+    // Meme calcul que returnCoins(), mais retourne le texte au lieu de l'afficher
+    // (reutilise par returnCoins() en interne, et utile pour une interface graphique)
+    std::string returnCoinsText(int prix);
 };
 
 #endif // COINSLOT_H

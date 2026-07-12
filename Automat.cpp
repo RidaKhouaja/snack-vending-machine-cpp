@@ -4,17 +4,17 @@
 
 Automat::Automat(int numSlots, int numProductsPerSlot)
     : numSlot(numSlots), numProductsPerSlot(numProductsPerSlot), cached(nullptr) {
-    slots = new Slot*[numSlot];
+    m_slots = new Slot*[numSlot];
     for (int i = 0; i < numSlot; ++i) {
-        slots[i] = nullptr;
+        m_slots[i] = nullptr;
     }
 }
 
 Automat::~Automat() {
     for (int i = 0; i < numSlot; ++i) {
-        delete slots[i];
+        delete m_slots[i];
     }
-    delete[] slots;
+    delete[] m_slots;
 }
 
 bool Automat::addSlot(Slot* slot) {
@@ -27,8 +27,8 @@ bool Automat::addSlot(Slot* slot) {
         return false;
     }
     for (int i = 0; i < numSlot; ++i) {
-        if (slots[i] == nullptr) {
-            slots[i] = slot;
+        if (m_slots[i] == nullptr) {
+            m_slots[i] = slot;
             return true;
         }
     }
@@ -50,9 +50,9 @@ Slot* Automat::searchSlot(int slotId) {
         return cached;
     }
     for (int i = 0; i < numSlot; ++i) {
-        if (slots[i] != nullptr && slots[i]->getId() == slotId) {
-            cached = slots[i];
-            return slots[i];
+        if (m_slots[i] != nullptr && m_slots[i]->getId() == slotId) {
+            cached = m_slots[i];
+            return m_slots[i];
         }
     }
     return nullptr;
@@ -94,8 +94,8 @@ bool Automat::dropSlot(int slotId) {
 
 void Automat::fillAll() {
     for (int i = 0; i < numSlot; ++i) {
-        if (slots[i] != nullptr) {
-            slots[i]->setNumProducts(numProductsPerSlot);
+        if (m_slots[i] != nullptr) {
+            m_slots[i]->setNumProducts(numProductsPerSlot);
         }
     }
 }
@@ -123,12 +123,12 @@ void Automat::displaySlots() const {
     std::cout << "+------+----------------------+----------+---------+\n";
     bool empty = true;
     for (int i = 0; i < numSlot; ++i) {
-        if (slots[i] != nullptr) {
+        if (m_slots[i] != nullptr) {
             empty = false;
-            std::cout << "| " << std::setw(4) << slots[i]->getId() << " | "
-                       << std::setw(20) << std::left << slots[i]->getProductName()
-                       << std::right << " | " << std::setw(6) << slots[i]->getPrice()
-                       << "   | " << std::setw(7) << slots[i]->getNumProducts() << " |\n";
+            std::cout << "| " << std::setw(4) << m_slots[i]->getId() << " | "
+                       << std::setw(20) << std::left << m_slots[i]->getProductName()
+                       << std::right << " | " << std::setw(6) << m_slots[i]->getPrice()
+                       << "   | " << std::setw(7) << m_slots[i]->getNumProducts() << " |\n";
         }
     }
     if (empty) {
@@ -137,12 +137,27 @@ void Automat::displaySlots() const {
     std::cout << "+------+----------------------+----------+---------+\n";
 }
 
+std::vector<SlotInfo> Automat::getAllSlotsInfo() const {
+    std::vector<SlotInfo> infos;
+    for (int i = 0; i < numSlot; ++i) {
+        if (m_slots[i] != nullptr) {
+            infos.push_back({m_slots[i]->getId(), m_slots[i]->getProductName(),
+                              m_slots[i]->getPrice(), m_slots[i]->getNumProducts()});
+        }
+    }
+    return infos;
+}
+
 int Automat::selectionnerProduit() {
     return keypad.getSelection();
 }
 
 int Automat::insererPiece() {
     return coinSlot.updateCoinAmount();
+}
+
+bool Automat::essayerAjouterPiece(int valeur) {
+    return coinSlot.ajouterPiece(valeur);
 }
 
 int Automat::getMontantInsere() const {
@@ -159,4 +174,8 @@ bool Automat::verifierChute() {
 
 void Automat::rendreMonnaie(int prix) {
     coinSlot.returnCoins(prix);
+}
+
+std::string Automat::rendreMonnaieText(int prix) {
+    return coinSlot.returnCoinsText(prix);
 }

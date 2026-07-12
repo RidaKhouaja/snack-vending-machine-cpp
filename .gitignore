@@ -1,9 +1,22 @@
-# Exécutable compilé
+# Exécutables compilés
 distributeur
+distributeur.exe
+serveur
+serveur.exe
+serveur_distributeur
+serveur_distributeur.exe
 
 # Fichiers objets
 *.o
+*.obj
 *.out
+
+# Logs
+*.log
+
+# Dossiers de build (CMake, si jamais reutilises)
+build/
 
 # Fichiers système
 .DS_Store
+Thumbs.db
