@@ -199,5 +199,6 @@ Monnaie rendue (5 DH) :
 - Surcharge de fonctions (`addSlot()`)
 - Gestion manuelle de la mémoire (`new` / `delete`)
 - `enum class` pour modéliser une machine à états
-- Serveur HTTP en C++ (bibliothèque header-only, réutilisation de la logique métier sans dépendance à une interface particulière)
+
+## Auteur
 
